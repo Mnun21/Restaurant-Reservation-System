@@ -4,7 +4,12 @@ import ErrorAlert from "../layout/ErrorAlert";
 
 
 export default function ReservationsForm() {
-    
+
+    //Hooks
+    const history = useHistory();
+
+    //States
+    const [errors, setErrors] = ([]);
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
@@ -13,10 +18,8 @@ export default function ReservationsForm() {
         reservation_time: '',
         people: 0,
     });
-    const [errors, setErrors] = ([]);
-
-    const history = useHistory();
-
+    
+    //Handle functions
     function handleChange({ event }) {
         setFormData({...formData, [event.name]: event.value });
     }
@@ -24,38 +27,55 @@ export default function ReservationsForm() {
     function handleSubmit (event) {
         event.preventDefault();
 
-        if ( checkDate() ) {
-            history.push(`/dashboard?date={formData.resevation_date}`);
-        }
+            if ( checkDate() ) {
+                history.push(`/dashboard?date={formData.resevation_date}`);
+            }
     }
 
+    //Validation
     function checkDate() {
 
-        const reservationDate = new Date(formData.reservation_date);
+        const reservationDate = new Date(`${formData.reservation_date}T${formData.reservation_time}:00.000`);
         const currentDate = new Date();
 
         const errorMessages = [];
 
-        if (reservationDate.getDay === 2) {
-            errorMessages.push({ message: "Reservations cannot be made on a Tuesday."})
-        }
+            if (reservationDate.getDay === 2) {
+                errorMessages.push({ message: "Reservations cannot be made on a Tuesday."})
+            }
 
-        if (reservationDate < currentDate) {
-            errorMessages.push({ message: "Reservations must be made at a later time"})
-        }
+            if (reservationDate < currentDate) {
+                errorMessages.push({ message: "Reservations must be made at a later time"})
+            }
+
+            if ( reservationDate.getHours() < 10 || (reservationDate.getHours() === 10 && reservationDate.getMinutes() < 30) ) {
+                errorMessages.push({ message: "Reservations cannot be made before 10:30am." })
+            }
+
+            else if ( reservationDate.getHours() > 22 || (reservationDate.getHours() === 22 && reservationDate.getMinutes() >= 30) ) {
+                errorMessages.push({ message: "Reservations cannot be made after closing."})
+            }
+
+            else if ( reservationDate.getHours() > 21 || (reservationDate.getHours() === 21 && reservationDate.getMinutes() > 30) ) {
+                errorMessages.push({ message: "Reservations must be made at least an hour before closing."})
+            }
+
 
         setErrors(errorMessages);
 
-        if (errorMessages.length > 0 ) {
-            return false;
-        }
+            if (errorMessages.length > 0 ) {
+                return false;
+            }
 
         return true;
 
     }
 
+
     const errorsWarning = () => {
+
         return errors.map((error, index) => <ErrorAlert key={index} error={error} />);
+
     }
 
 
@@ -130,6 +150,7 @@ export default function ReservationsForm() {
 
             <button className="btn btn-primary m-1" type="submit" onClick={handleSubmit}>Submit</button>
             <button className="btn btn-danger m-1" type="button" onClick={history.go(-1)}>Cancel</button>
+
         </form>
     ); 
 }
