@@ -77,12 +77,12 @@ export default function ReservationsForm() {
         return errors.map((error, index) => <ErrorAlert key={index} error={error} />);
 
     }
-
+        //{errorsWarning()}
 
     return (
         <form>
             
-            {errorsWarning()}
+            
 
             <label className="form-label" htmlFor="first_name">First Name:&nbsp;</label>
                 <input
