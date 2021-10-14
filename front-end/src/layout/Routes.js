@@ -25,15 +25,17 @@ import NotFound from "./NotFound";
 
 function Routes() {
 
+//Variable declarations      
   const query = useQuery();
   const date = query.get("date") ? query.get("date") : today();
 
+  //States
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
   const [tables, setTables] = useState([]);
   const [tableError, setTableError] = useState(null);
 
-
+//Load API
   useEffect(loadDashboard, [date]);
 
 
@@ -79,6 +81,8 @@ function Routes() {
                     <ReservationsForm
                             loadDashboard={loadDashboard}
                             edit={true}
+                            reservations={reservations}
+
                     />
             </Route>
 

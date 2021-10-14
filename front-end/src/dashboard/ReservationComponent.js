@@ -4,6 +4,12 @@ export default function ReservationComponent ({ reservation }) {
 
     if (!reservation || reservation.status === "finished") return null;
 
+    const cancelMessage = () => {
+        if (window.confirm("Do you want to cancel this reservation? This cannot be undone.")) {
+            window.location.reload();
+        }
+    }
+
     return (
         <tr>
             <th scope="row">{reservation.reservation_id}</th>
@@ -15,6 +21,18 @@ export default function ReservationComponent ({ reservation }) {
             <td>{reservation.people}</td>
             
             <td data-reservation-id-status={reservation.reservation_id}>{reservation.status}</td>
+
+            <td>
+                <a href={`/reservations/${reservation.reservation_id}/edit`}>
+                        <button type="button">Edit</button>
+                </a>
+            </td>
+
+            <td>
+                    <button type="button" onClick={cancelMessage} data-reservation-id-cancel={reservation.reservation_id}>
+                                Cancel
+                    </button>
+            </td>
 
 
             {reservation.status === "booked" &&
