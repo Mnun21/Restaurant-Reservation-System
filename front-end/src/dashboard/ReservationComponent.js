@@ -33,7 +33,7 @@ export default function ReservationComponent ({ loadDashboard, reservation }) {
             {reservation.status === "booked" &&
             <>
             <td>
-                <a href={`/reservations/${reservation_id}/seat`}>
+                <a href={`/reservations/${reservation.reservation_id}/seat`}>
                     <button className="btn btn-light" type="button">Seat</button>
                 </a>
             </td>

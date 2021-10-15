@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import ErrorAlert from "../layout/ErrorAlert";
 import { createTable } from "../utils/api";
+import ErrorAlert from "../layout/ErrorAlert";
+ 
 
 export default function CreateTable ( { loadDashboard } ) {
     
@@ -10,22 +11,30 @@ export default function CreateTable ( { loadDashboard } ) {
     const [error, setError] = useState([]);
     const [formData, setFormData] = useState({
         table_name: "",
-        capacity: 1,
+        capacity: "",
     })
 
-    function handleChange ({ target }) {
-        setFormData({ ...formData, [target.name]: target.value })
+    const handleChange = ({ target }) => {
+        setFormData({ ...formData, [target.name]: target.name === "capacity" ? Number(target.value) : target.value });
     }
 
-    function handleSubmit (event) {
+    const handleSubmit = (event) => {
         event.preventDefault();
 
+        const abortController = new AbortController();
+
         if (checkFields()) {
-            history.push(`/dashboard`);
+            
+            createTable(formData, abortController.signal)
+                    .then(loadDashboard)
+                    .then(() => history.push(`/dashboard`))
+                    .catch(setError);
         }
+
+        return () => abortController.abort();
     }
 
-    function checkFields() {
+    const checkFields = () => {
         let foundError = null;
 
         if (formData.table_name === "" || formData.capacity === "") {
@@ -37,7 +46,7 @@ export default function CreateTable ( { loadDashboard } ) {
 
         setError(foundError);
 
-        return foundError.length !== null;
+        return foundError === null;
 
     }
 
@@ -46,30 +55,32 @@ export default function CreateTable ( { loadDashboard } ) {
 
             <ErrorAlert error={error} />
 
-            <label htmlFor="table_name">Table Name:&nbsp;</label>
+            <label className="form-label" htmlFor="table_name">Table Name:&nbsp;</label>
             <input
+                    className="form-control"
                     name="table_name"
                     id="table_name"
                     type="text"
-                    minLength="2"
+                    minLength={2}
                     onChange={handleChange}
                     value={formData.table_name}
                     required
             />
 
-            <label htmlFor="capacity">Capacity:&nbsp;</label>
+            <label className="form-control" htmlFor="capacity">Capacity:&nbsp;</label>
             <input
+                    className="form-control"
                     name="capacity"
                     id="capacity"
                     type="number"
-                    min="1"
+                    min={1}
                     onChange={handleChange}
                     value={formData.capacity}
                     required 
             />
 
-            <button type="submit" onClick={handleSubmit}>Submit</button>
-            <button type="button" onClick={history.goBack}>Cancel</button>
+            <button className="btn btn-primary" type="submit" onClick={handleSubmit}>Submit</button>
+            <button className="btn btn-danger" type="button" onClick={history.goBack}>Cancel</button>
 
         </form>             
     );

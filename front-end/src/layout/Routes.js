@@ -80,9 +80,7 @@ function Routes() {
             <Route path="/reservations/:reservation_id/edit">
                     <ReservationsForm
                             loadDashboard={loadDashboard}
-                            edit={true}
-                            reservations={reservations}
-
+                            edit={false}
                     />
             </Route>
 
