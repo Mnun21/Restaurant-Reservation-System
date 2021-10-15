@@ -144,7 +144,7 @@ export default function ReservationsForm( { loadDashboard, edit, resevations } )
             {errorsWarning}
             <ErrorAlert error={apiError} />
             <ErrorAlert error={reservationsError} />
-            
+
             <label className="form-label" htmlFor="first_name">First Name:&nbsp;</label>
                 <input
                     className="form-control"
@@ -172,7 +172,7 @@ export default function ReservationsForm( { loadDashboard, edit, resevations } )
                     className="form-control"
                     name="mobile_number"
                     id="mobile_number"
-                    type="text"
+                    type="text" 
                     onChange={handleChange}
                     value={formData.mobile_number}
                     required
