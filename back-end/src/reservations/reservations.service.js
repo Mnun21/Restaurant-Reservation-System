@@ -9,17 +9,16 @@ function list(date, mobile_number) {
 			.where({ reservation_date: date })
 			.orderBy("reservation_time", "asc");
 	}
-	if(mobile_number) {
-		return knex("reservations")
-    .whereRaw(
-      "translate(mobile_number, '() -', '') like ?",
-      `%${mobile_number.replace(/\D/g, "")}%`
-    )
-    .orderBy("reservation_date");
+	else if(mobile_number) {
+		return knex(tableName)
+			.select("*")
+    		.whereRaw("translate(mobile_number, '() -', '') like ?", `%${mobile_number.replace(/\D/g, "")}%`)
+			.orderBy("reservation_date");
 	}
 
 	return knex(tableName)
 		.select("*");
+
 }
 
 function create(reservation) {
