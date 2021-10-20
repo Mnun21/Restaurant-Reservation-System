@@ -6,6 +6,7 @@ export default function ReservationComponent ({ loadDashboard, reservation }) {
     if (!reservation || reservation.status === "finished") return null;
 
     const cancelMessage = () => {
+
         if (window.confirm("Do you want to cancel this reservation? This cannot be undone.")) {
             
             const abortController = new AbortController();
@@ -34,7 +35,7 @@ export default function ReservationComponent ({ loadDashboard, reservation }) {
             <>
             <td>
                 <a href={`/reservations/${reservation.reservation_id}/seat`}>
-                    <button className="btn btn-light" type="button">Seat</button>
+                    <button className="btn btn-outline-dark" type="button">Seat</button>
                 </a>
             </td>
             <td>

@@ -1,111 +1,126 @@
-import React, { useState, useEffect }from "react";
-import { useHistory, useParams } from "react-router";
+import React, { useState, useEffect } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import { seatTable, listReservations } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
 
+/**
+ * User selects from a drop down the available tables to seat the reservation
+ */
+export default function SeatReservation({ loadDashboard, tables }) {
 
-export default function SeatReservation ({ tables, loadDashboard}) {
+	const history = useHistory();
+	const { reservation_id } = useParams();
 
-    const [table_id, setTableId] = useState(0);
-    const [errors, setErrors] = useState([]);
-    const [apiError, setApiError] = useState(null);
-    const [reservations, setReservations] = useState([]);
-    const [reservationsError, setReservationsError] = useState(null);
-    
-    const { reservation_id } = useParams();
-    const history = useHistory();
+	const [table_id, setTableId] = useState(0);
+	const [reservations, setReservations] = useState([]);
+	const [reservationsError, setReservationsError] = useState(null);
+	const [errors, setErrors] = useState([]);
+	const [apiError, setApiError] = useState(null);
 
-    useEffect(() => {
-        const abortController = new AbortController();
+	/**
+	 * Makes an API call to get current reservations
+	 */
+	useEffect(() => {
 
-        setReservationsError(null);
+    	const abortController = new AbortController();
 
-        listReservations(null, abortController.signal)
-                .then(setReservations)
-                .catch(setReservationsError);
-        
-        return () => abortController.abort();
+    	setReservationsError(null);
 
-    }, []);
+    	listReservations(null, abortController.signal)
+      		.then(setReservations)
+      		.catch(setReservationsError);
 
-    if (!tables || !reservations) return null;
+    	return () => abortController.abort();
+  	}, []);
 
-    const handleChange = ({ target }) => {
-        setTableId(target.value);
-    }
+	if(!tables || !reservations) return null;
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const abortController = new AbortController();
+	
+	function handleChange({ target }) {
+		setTableId(target.value);
+	}
 
-        if(checkSeat()) {
-            seatTable(reservation_id, table_id, abortController.signal)
-                            .then(loadDashboard)
-                            .then(() => history.push(`/dashboard`))
-                            .catch(setApiError);
+	/**
+	 * Checks seat status before submission
+	 */
+	const handleSubmit = (event) => {
 
-        }
+		event.preventDefault();
+		const abortController = new AbortController();
 
-        return () => abortController.abort();
-    }
+		if(checkSeat()) {
+			seatTable(reservation_id, table_id, abortController.signal)
+				.then(loadDashboard)
+				.then(() => history.push(`/dashboard`))
+				.catch(setApiError);
+		}
 
-    const checkSeat = () => {
-        const foundErrors = [];
+		return () => abortController.abort();
+	}
 
-        const foundTable = tables.find((table) => table.table_id === Number(table_id));
-        const foundReservation = reservations.find((reservation) => reservation.reservation_id === Number(reservation_id));
+	/**
+	 * Ensures table has enough seats for party
+	 */
+	const checkSeat = () => {
 
-        if (!foundTable) {
-            foundErrors.push("The table you selected does not exist.")
-        }
-        else if (!foundReservation) {
-            foundErrors.push("This reservation does not exist.")
-        }
-        else {
-            if (foundTable.status === "occupied") {
-                foundErrors.push("The table is currently occupied.")
-            }
+		const foundErrors = [];
 
-            if (foundTable.capacity < foundReservation.people) {
-                foundErrors.push(`The table you selected cannot seat ${foundReservation.people} people.`)
-            }
-        }
+		const foundTable = tables.find((table) => table.table_id === Number(table_id));
+		const foundReservation = reservations.find((reservation) => reservation.reservation_id === Number(reservation_id));
 
-        setErrors(foundErrors);
+		if(!foundTable) {
+			foundErrors.push("The table you selected does not exist");
+		}
+		else if(!foundReservation) {
+			foundErrors.push("This reservation does not exist")
+		}
+		else {
+			if(foundTable.status === "occupied") {
+				foundErrors.push("The table you selected is currently occupied")
+			}
 
-        return foundErrors.length === 0;
+			if(foundTable.capacity < foundReservation.people) {
+				foundErrors.push(`The table you selected cannot seat ${foundReservation.people} people.`)
+			}
+		}
 
-    }
+		setErrors(foundErrors);
 
-    const tableOptions = () => {
-        return tables.map((table) => <option key={table.table_id} value={table.table_id}>{table.table_name} - {table.capacity}</option>);
-    }
+		return foundErrors.length === 0;
+	}
 
-    const errorsMessage = () => {
-        return errors.map((error, index) =>  <ErrorAlert key={index} error={error} /> )
-    }
+	const tableInfo = () => {
+		return tables.map((table) => 
+			<option key={table.table_id} value={table.table_id}>{table.table_name} - {table.capacity}</option>);
+	};
 
-    return (
-        <form className="form-select">
-                {errorsMessage()}
-                <ErrorAlert error={apiError} />
-                <ErrorAlert error={reservationsError} />
+	const errorsWarning = () => {
+		return errors.map((error, idx) => <ErrorAlert key={idx} error={error} />);
+	};
 
-                <label className="form-label" hmtlFor="table_id">Choose Table:</label>
-                <select
-                        className="form-control"
-                        name="table_id"
-                        id="table_id"
-                        value={table_id}
-                        onChange={handleChange}
-                >
-                        <option value={0}>Choose a table</option>
-                        {tableOptions()}
-                </select>
+	return (
 
-                <button className="btn btn-primary" type="Submit" onClick={handleSubmit}>Submit</button>
-                <button className="btn btn-danger" type="button" onClick={history.goBack}>Cancel</button>
-        </form>
-    );
+		<form className="form-select">
+			{errorsWarning()}
+			<ErrorAlert error={apiError} />
+			<ErrorAlert error={reservationsError} />
+
+			<label className="display 4" htmlFor="table_id">Choose Table:</label>
+			<select 
+				className="form-control"
+				name="table_id" 
+				id="table_id"
+				value={table_id}
+				onChange={handleChange}
+			>
+				<option value={0}>Tables</option>
+				{tableInfo()}
+			</select>
+
+			<button className="btn btn-primary m-1" type="submit" onClick={handleSubmit}>Submit</button>
+			<button className="btn btn-danger m-1" type="button" onClick={history.goBack}>Cancel</button>
+		</form>
+
+	);
 }
