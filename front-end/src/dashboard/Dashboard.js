@@ -56,7 +56,7 @@ function Dashboard({ date, loadDashboard, reservations, reservationsError, table
 	return (
 		<main>
 
-		<h1>Dashboard</h1>
+		
 		<h4 className="display 4">Reservations for {date}</h4>
 
 				<button className="btn btn-secondary" type="button" name="previous" onClick={handleClick}>Previous</button>
